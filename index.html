@@ -1,1 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WBJEE 2026 Rank Predictor</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-dark: #1a237e;       
+      --rank-red: #ff1744;           
+      --download-blue: #2979ff;      
+      --college-green: #00bfa5;      
+      --accent-yellow: #ffd000;      
+      
+      --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      --card-bg: rgb(255, 255, 255);
+      --text: #263238;
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.2);
+    }
 
+    [data-theme="dark"] {
+      --bg-gradient: linear-gradient(135deg, #000000 0%, #1a237e 100%);
+      --card-bg: rgba(20, 20, 20, 0.9);
+      --text: #ffffff;
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      color: var(--text);
+    }
+
+    /* Background Shapes */
+    .shape {
+      position: absolute;
+      filter: blur(60px);
+      z-index: -1;
+      animation: float 8s infinite ease-in-out alternate;
+    }
+    .shape-1 { top: 5%; left: 5%; width: 200px; height: 200px; background: var(--download-blue); opacity: 0.3; border-radius: 50%; }
+    .shape-2 { bottom: 5%; right: 5%; width: 250px; height: 250px; background: var(--rank-red); opacity: 0.2; border-radius: 50%; animation-delay: -2s; }
+
+    @keyframes float {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-20px) scale(1.1); }
+    }
+
+    /* Header & Countdown */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      padding: 15px 25px;
+      border-radius: 15px;
+      box-shadow: var(--shadow-soft);
+      border-bottom: 3px solid var(--accent-yellow); 
+      z-index: 10;
+    }
+
+    .countdown {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--accent-yellow);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: 2px solid var(--text);
+      color: var(--text);
+      padding: 6px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .theme-toggle:hover { background: var(--text); color: var(--card-bg); }
+
+    /* Main Container */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      width: 100%;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    h1 { color: var(--download-blue); margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+    h3 { color: var(--college-green); }
+    
+    /* Inputs */
+    .input-group { margin-bottom: 1.5rem; }
+    
+    label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: var(--text); }
+    
+    input, select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 2px solid rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.9);
+      font-size: 1rem;
+      transition: 0.3s;
+      box-sizing: border-box;
+      color: #333;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--download-blue);
+      box-shadow: 0 0 10px rgba(41, 121, 255, 0.2);
+    }
+
+    /* PCM Grid */
+    .pcm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .pcm-grid input { text-align: center; font-weight: bold; border-bottom: 3px solid var(--accent-yellow); }
+
+    /* Analyze Button */
+    .btn-primary {
+      background: linear-gradient(45deg, #212121, #424242);
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    
+    /* Download Button */
+    #downloadBtn {
+      background: linear-gradient(45deg, var(--download-blue), #2962ff);
+      margin-top: 20px;
+    }
+    #downloadBtn:hover { box-shadow: 0 0 15px var(--download-blue); }
+
+    /* Results Area */
+    .result-section {
+      display: none;
+      margin-top: 30px;
+      animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .metrics-card {
+      background: rgba(0,0,0,0.03);
+      border-left: 5px solid var(--rank-red);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Rank Text */
+    #displayRank {
+      color: var(--rank-red);
+      text-shadow: 0 0 20px rgba(255, 23, 68, 0.4);
+      font-weight: 900;
+    }
+
+    .badge {
+      background: var(--primary-dark);
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+
+    /* History Sidebar */
+    .history-panel {
+      margin-top: 2rem;
+      background: rgba(255, 234, 0, 0.1); 
+      padding: 1rem;
+      border-radius: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      border: 1px solid var(--accent-yellow);
+    }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    
+    th { 
+      background: var(--college-green); 
+      color: white; 
+      padding: 14px; 
+      text-align: left; 
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+    
+    td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); font-weight: 500;}
+    tr:hover { background: rgba(0, 191, 165, 0.05); } /* Hover effect */
+    
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 1px;
+    }
+
+    /* Animation */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 600px) {
+      .header-bar { flex-direction: column; gap: 10px; text-align: center; }
+      .card { padding: 1.5rem; }
+      .pcm-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+
+  <div class="header-bar">
+    <div>
+      <i class="fas fa-graduation-cap" style="color:var(--download-blue); font-size: 1.2rem;"></i> 
+      <strong style="color:var(--text)">WBJEE 2026</strong>
+    </div>
+    <div class="countdown" id="countdown">Loading Timer...</div>
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <i class="fas fa-adjust"></i>
+    </button>
+  </div>
+
+  <div class="container">
+    <div class="card" id="captureArea">
+      
+      <h1 style="text-align:center;">Rank Predictor AI</h1>
+      <p style="text-align:center; opacity: 0.7; font-weight:500;">Enter your marks to analyze admission chances</p>
+
+      <div class="input-group">
+        <label>Subject Marks (Auto-Calculates Total)</label>
+        <div class="pcm-grid">
+          <div><input type="number" id="math" placeholder="Math (100)" min="0" max="100" oninput="updateTotal()"></div>
+          <div><input type="number" id="phy" placeholder="Phy (50)" min="0" max="50" oninput="updateTotal()"></div>
+          <div><input type="number" id="chem" placeholder="Chem (50)" min="0" max="50" oninput="updateTotal()"></div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Total Marks & Category</label>
+        <div style="display:flex; gap:10px;">
+          <input type="number" id="marks" placeholder="Total (200)" min="0" max="200">
+          <select id="category">
+            <option value="GEN">General</option>
+            <option value="OBC">OBC</option>
+            <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="TFW">TFW</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="predictRank()">
+        Analyze Result <i class="fas fa-bolt" style="color:var(--accent-yellow)"></i>
+      </button>
+
+      <div id="historyPanel" class="history-panel" style="display:none;">
+        <small style="color:var(--text)"><strong><i class="fas fa-history" style="color:var(--rank-red)"></i> Recent Checks:</strong></small>
+        <div id="historyList"></div>
+      </div>
+
+      <div id="resultContainer" class="result-section">
+        <hr style="margin: 20px 0; border: 0; border-top: 1px dashed rgba(0,0,0,0.2);">
+        
+        <div class="metrics-card">
+          <h2 id="displayRank" style="font-size: 3rem; margin:0;">0</h2>
+          <p style="color:var(--text); font-weight:bold;">Estimated GMR Rank</p>
+          <div style="display:flex; justify-content:center; gap:20px; margin-top:10px;">
+            <span class="badge" id="catRankDisplay">Cat Rank: 0</span>
+            <span class="badge" id="scoreDisplay" style="background:var(--college-green)">Score: 0</span>
+          </div>
+        </div>
+
+        <div style="height: 250px; position: relative; margin-bottom:20px;">
+          <canvas id="scoreChart"></canvas>
+        </div>
+
+        <h3><i class="fas fa-university"></i> Likely Colleges</h3>
+        <input type="text" id="collegeSearch" placeholder="Filter colleges..." onkeyup="filterTable()" style="margin-bottom:15px; border-color:var(--college-green);">
+        
+        <div class="table-container">
+          <table id="collegeTable">
+            <thead>
+              <tr>
+                <th>College & Branch</th>
+                <th>Cutoff</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="collegeListBody"></tbody>
+          </table>
+        </div>
+
+        <button id="downloadBtn" class="btn-primary" onclick="downloadPDF()">
+          <i class="fas fa-file-pdf"></i> Download Report
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    &copy; WBJEE Predictor @JEE2Med 2026
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    // --- Countdown Timer ---
+    const examDate = new Date("April 28, 2026 11:00:00").getTime(); 
+    setInterval(() => {
+      const now = new Date().getTime();
+      const distance = examDate - now;
+      if (distance < 0) {
+        document.getElementById("countdown").innerText = "Exam Started / Over";
+        return;
+      }
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      document.getElementById("countdown").innerHTML = `<i class="far fa-clock"></i> ${days}d ${hours}h to WBJEE`;
+    }, 1000);
+
+    // --- Core Logic ---
+    function updateTotal() {
+      const m = parseFloat(document.getElementById('math').value) || 0;
+      const p = parseFloat(document.getElementById('phy').value) || 0;
+      const c = parseFloat(document.getElementById('chem').value) || 0;
+      if(m+p+c <= 200) document.getElementById('marks').value = m+p+c;
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+      } else {
+        body.setAttribute('data-theme', 'dark');
+      }
+    }
+
+    // Cutoff Data
+    const cutoffs = [
+        { name: "Jadavpur University (CSE)", min: 22, max: 89, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (IT)", min: 126, max: 293, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (ETE)", min: 128, max: 280, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (EE)", min: 301, max: 504, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (ME)", min: 511, max: 761, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (CHEM E)", min: 442, max: 639, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (CIVIL E)", min: 986, max: 1594, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (FTE)", min: 1546, max: 3125, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (PROD E)", min: 880, max: 1151, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (POWER E)", min: 648, max: 1073, categories: ["GEN","OBC","SC","ST","TFW"] },
+        { name: "Jadavpur University (IEE)", min: 303, max: 412, categories: ["GEN","OBC","SC","ST","TFW"] },
+        
+        { name: "Kalyani Govt. Engg. College (CSE)", min: 721, max: 1432, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Kalyani Govt. Engg. College (IT)", min: 1470, max: 1901, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Kalyani Govt. Engg. College (ECE)", min: 1117, max: 2210, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Kalyani Govt. Engg. College (EE)", min: 1921, max: 2982, categories: ["GEN","OBC","SC","ST"] },  
+        { name: "Kalyani Govt. Engg. College (ME)", min: 1954, max: 3849, categories: ["GEN","OBC","SC","ST"] },
+
+        { name: "Jalpaiguri Govt. Engg. College (CSE)", min: 316, max: 1747, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Jalpaiguri Govt. Engg. College (IT)", min: 1870, max: 2335, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Jalpaiguri Govt. Engg. College (ECE)", min: 1565, max: 2724, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Jalpaiguri Govt. Engg. College (EE)", min: 1857, max: 3446, categories: ["GEN","OBC","SC","ST"] },  
+        { name: "Jalpaiguri Govt. Engg. College (ME)", min: 2856, max: 4455, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Jalpaiguri Govt. Engg. College (CIVIL E)", min: 2337, max: 5839, categories: ["GEN","OBC","SC","ST"] },
+
+        { name: "University of Calcutta (CSE)", min: 510, max: 830, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Universiy of Calcutta (IT)", min: 855, max: 1195, categories: ["GEN","OBC","SC","ST"] },
+        { name: "University of Calcutta (ECE)", min: 1183, max: 1392, categories: ["GEN","OBC","SC","ST"] },  
+        { name: "University of Calcutta (EE)", min: 1408, max: 1634, categories: ["GEN","OBC","SC","ST"] },
+        { name: "University of Calcutta (CHEM E)", min: 1597, max: 2282, categories: ["GEN","OBC","SC","ST"] },  
+        { name: "University of Calcutta (CIVIL E)", min: 1954, max: 3849, categories: ["GEN","OBC","SC","ST"] },
+        { name: "University of Calcutta (IEE)", min: 1334, max: 1918, categories: ["GEN","OBC","SC","ST"] }, 
+        
+        { name: "Heritage Institute of Technology (CSE)", min: 782, max: 3585, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CSE CYBERSECURITY)", min: 4939, max:6224, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CSE AIML)", min: 1039, max: 4487, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CSBS)", min: 5481, max: 7956, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (EE)", min: 6953, max: 12548, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (ME)", min: 8670, max: 22061, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (ECE)", min: 2243, max: 8851, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (IT)", min: 3145, max: 5044, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CHEM E)", min: 3731, max: 22836, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CIVIL E)", min: 5687, max: 27759, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (BIOTECH E)", min: 4978, max: 18791, categories: ["GEN","OBC","SC","ST"] },
+        { name: "Heritage Institute of Technology (CS DATASCIENCE)", min: 2753, max: 5361, categories: ["GEN","OBC","SC","ST"] },
+       
+{ name: "Techno Main SaltlaKe (CSE)", min: 3756, max: 18777, categories: ["GEN","OBC","SC","ST"] }, 
+{ name: "Techno Main SaltlaKe (CSE AIML)", min: 5966, max: 20190, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (CSE DATASCIENCE)", min: 2753, max: 5361, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (CSE IOT)", min: 5687, max: 27759, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (IT)", min: 3145, max: 5044, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (ECE)", min: 7042, max: 27068, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (EE)", min: 18578, max: 52524, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (ME)", min: 19682, max: 97702, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (CIVIL E)", min: 11127, max: 108510, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (CSBS)", min: 19975, max: 40144, categories: ["GEN","OBC","SC","ST"] },
+{ name: "Techno Main SaltlaKe (BIOTECH E)", min: 9280, max: 34129, categories: ["GEN","OBC","SC","ST"] },
+ ];
+
+    let chartInstance = null;
+
+    function predictRank() {
+      const marks = parseFloat(document.getElementById("marks").value);
+      const category = document.getElementById("category").value;
+      const resultContainer = document.getElementById("resultContainer");
+      
+      if (isNaN(marks) || marks < 0 || marks > 200) {
+        alert("Please enter valid marks (0-200)");
+        return;
+      }
+
+      // Calculations
+      const gmr = Math.round(18600000000 / Math.pow(marks + 1, 3.875));
+      const catFactor = { GEN: 1, SC: 0.085, ST: 0.026, OBC: 0.14, TFW: 0.05 };
+      const categoryRank = Math.round(gmr * catFactor[category]);
+
+      // UI
+      document.getElementById("displayRank").innerText = gmr.toLocaleString();
+      document.getElementById("catRankDisplay").innerText = `${category}: ${categoryRank.toLocaleString()}`;
+      document.getElementById("scoreDisplay").innerText = `Score: ${marks}`;
+
+      // Table Logic
+      const tableBody = document.getElementById("collegeListBody");
+      tableBody.innerHTML = "";
+      
+      // Filter Logic
+      let matches = cutoffs.filter(col => col.categories.includes(category) && categoryRank <= col.max * 1.5); 
+      
+      if(matches.length === 0) {
+        tableBody.innerHTML = "<tr><td colspan='3'>No top colleges found. Keep checking other lists!</td></tr>";
+      } else {
+        matches.forEach(col => {
+          let status = categoryRank <= col.max ? 
+            '<span style="color:#00bfa5; font-weight:bold">High Chance</span>' : 
+            '<span style="color:#ff9100; font-weight:bold">Borderline</span>';
+            
+          tableBody.innerHTML += `
+            <tr>
+              <td>${col.name}</td>
+              <td>${col.max}</td>
+              <td>${status}</td>
+            </tr>`;
+        });
+      }
+
+      // Render Chart
+      renderChart(marks);
+      
+      // Save History
+      addToHistory(marks, gmr);
+
+      // Show
+      resultContainer.style.display = "block";
+      setTimeout(() => resultContainer.scrollIntoView({behavior: "smooth"}), 100);
+    }
+
+    function renderChart(marks) {
+      const ctx = document.getElementById('scoreChart').getContext('2d');
+      const m = parseFloat(document.getElementById('math').value) || 0;
+      const p = parseFloat(document.getElementById('phy').value) || 0;
+      const c = parseFloat(document.getElementById('chem').value) || 0;
+
+      let data = (m+p+c === marks && marks > 0) ? [m, p, c, 200-marks] : [marks, 200-marks];
+      let labels = (m+p+c === marks && marks > 0) ? ['Math', 'Phy', 'Chem', 'Lost'] : ['Obtained', 'Lost'];
+      let colors = ['#2979ff', '#00bfa5', '#ff1744', '#cfd8dc']; // Blue, Green, Red, Grey
+
+      if(chartInstance) chartInstance.destroy();
+      
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    // --- History Feature ---
+    function addToHistory(marks, rank) {
+      const list = document.getElementById("historyList");
+      document.getElementById("historyPanel").style.display = "block";
+      const div = document.createElement("div");
+      div.className = "history-item";
+      div.innerHTML = `<span>Marks: ${marks}</span> <span>Rank: ~${rank}</span>`;
+      list.prepend(div);
+      if(list.children.length > 3) list.removeChild(list.lastChild);
+    }
+
+    function filterTable() {
+      const filter = document.getElementById("collegeSearch").value.toUpperCase();
+      const rows = document.getElementById("collegeListBody").getElementsByTagName("tr");
+      for (let i = 0; i < rows.length; i++) {
+        const txt = rows[i].innerText;
+        rows[i].style.display = txt.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+      }
+    }
+
+    async function downloadPDF() {
+      const element = document.getElementById("captureArea");
+      const btn = document.getElementById("downloadBtn");
+      btn.style.display = "none"; 
+      
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const w = pdf.internal.pageSize.getWidth();
+      const h = (canvas.height * w) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+      pdf.save('wbjee-2026-report.pdf');
+      
+      btn.style.display = "block"; 
+    }
+  </script>
+</body>
+</html>
