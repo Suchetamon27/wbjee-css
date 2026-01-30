@@ -90,10 +90,10 @@ Distributed under the MIT License. See LICENSE for more information.
 
 🌟 Acknowledgements
 Cutoff data based on 2024-2025 OR-CR trends.
-</strong>
 
-Made with © WBJEE Predictor @JEE2Med 2026
-For the Engineering aspirants.
+
+                                                     © WBJEE Predictor @JEE2Med 2026
+
 
 
 
