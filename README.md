@@ -17,6 +17,9 @@ The **WBJEE 2026 Rank Predictor** is a modern, responsive web application design
 
 Beyond simple prediction, it provides a **comprehensive dashboard** featuring subject-wise analysis, college probability based on previous year cutoffs, and a downloadable PDF report card.
 
+## 🔗Live Project Link:
+[https://wbjee-css.vercel.app/]
+
 ## ✨ Key Features
 
 * **🎯 Precision Rank Algorithm:** Uses a power-law regression model (`Marks vs Rank`) to estimate GMR and Category Ranks (SC/ST/OBC/TFW).
