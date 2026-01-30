@@ -53,7 +53,7 @@ Since this project is built using standard web technologies and CDN links, no co
 
 1.  **Clone the repository:**
     ```bash
-    git clone []( )
+    git clone [https://github.com/Suchetamon27/wbjee-css](https://github.com/Suchetamon27/wbjee-css )
     ```
 2.  **Navigate to the folder:**
     ```bash
