@@ -65,5 +65,33 @@ Since this project is built using standard web technologies and CDN links, no co
 
 ## 🧠 The Logic
 
-The rank prediction is based on a mathematical approximation curve derived from historical WBJEE data trends:
+The rank prediction is based on a mathematical approximation curve derived from historical WBJEE data trends.
+
+> Note: This is an estimation tool. Actual ranks depend on the difficulty of the paper and the number of candidates appearing in 2026.
+
+🤝 Contributing
+Contributions are always welcome!
+
+Fork the Project.
+
+Create your Feature Branch (git checkout -b feature/AmazingFeature).
+
+Commit your Changes (git commit -m 'Add some AmazingFeature').
+
+Push to the Branch (git push origin feature/AmazingFeature).
+
+Open a Pull Request.
+
+📜 License
+Distributed under the MIT License. See LICENSE for more information.
+
+🌟 Acknowledgements
+Cutoff data based on 2024-2025 OR-CR trends.
+</strong>
+
+Made with © WBJEE Predictor @JEE2Med 2026
+For the Engineering aspirants.
+
+
+
 
