@@ -91,8 +91,7 @@ Distributed under the MIT License. See LICENSE for more information.
 🌟 Acknowledgements
 Cutoff data based on 2024-2025 OR-CR trends.
 
-
-                                                     © WBJEE Predictor @JEE2Med 2026
+  © WBJEE Predictor @JEE2Med 2026
 
 
 
