@@ -46,10 +46,6 @@ The UI is built with a custom cool-tone palette:
 * **Icons:** [FontAwesome 6](https://fontawesome.com/) (CDN).
 * **PDF Generation:** [jsPDF](https://github.com/parallax/jsPDF) & [html2canvas](https://html2canvas.hertzen.com/).
 
-## 📸 Screenshots
-
-
-
 ## ⚙️ How to Run
 
 Since this project is built using standard web technologies and CDN links, no complex installation (npm/yarn) is required.
